@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:what_to_do/screens/home.dart';
 import 'package:what_to_do/screens/settings.dart';
+import 'package:what_to_do/widgets/add_task_button.dart';
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});
@@ -18,39 +19,31 @@ class _NavigationScreenState extends State<NavigationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-        onPressed: () {},
-        child: const Icon(Icons.add_outlined),
-      ),
+      floatingActionButton: const FloatingButton(),
       floatingActionButtonLocation:
           FloatingActionButtonLocation.miniCenterDocked,
-      bottomNavigationBar: Theme(
-        data: ThemeData(
-          splashColor: Colors.transparent,
-          highlightColor: Colors.transparent,
-        ),
-        child: BottomNavigationBar(
-            backgroundColor: null,
-            onTap: (val) {
-              setState(() {
-                currentIndex = val;
-              });
-            },
-            currentIndex: currentIndex,
-            elevation: 0,
-            items: const [
-              BottomNavigationBarItem(
-                backgroundColor: Colors.transparent,
-                label: "",
-                icon: Icon(Icons.home_filled),
-              ),
-              BottomNavigationBarItem(
-                label: "",
-                icon: Icon(Icons.settings_outlined),
-              )
-            ]),
-      ),
+      bottomNavigationBar: BottomNavigationBar(
+          unselectedItemColor: Colors.black,
+          selectedItemColor: Colors.white,
+          backgroundColor: Colors.black38,
+          onTap: (val) {
+            setState(() {
+              currentIndex = val;
+            });
+          },
+          currentIndex: currentIndex,
+          elevation: 0,
+          items: const [
+            BottomNavigationBarItem(
+              backgroundColor: Colors.transparent,
+              label: "",
+              icon: Icon(Icons.home_filled),
+            ),
+            BottomNavigationBarItem(
+              label: "",
+              icon: Icon(Icons.settings_outlined),
+            )
+          ]),
       backgroundColor: Theme.of(context).colorScheme.background,
       body: _widgetOptions[currentIndex],
     );
