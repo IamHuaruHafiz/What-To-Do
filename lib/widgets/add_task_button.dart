@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:what_to_do/widgets/task_buttons.dart';
 import 'package:what_to_do/widgets/task_form.dart';
 
 class FloatingButton extends StatelessWidget {
@@ -12,25 +11,19 @@ class FloatingButton extends StatelessWidget {
     return FloatingActionButton(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
       onPressed: () async {
-        await showModalBottomSheet(
+        await showDialog(
             context: context,
-            builder: (ctx) {
-              return Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16.0,
-                  vertical: 8,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Add Task",
-                      style: Theme.of(context).textTheme.titleLarge,
+            builder: (context) {
+              return const AlertDialog(
+                content: Wrap(children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.0,
+                      vertical: 16.0,
                     ),
-                    const TaskForm(),
-                    const TaskButtons()
-                  ],
-                ),
+                    child: TaskForm(),
+                  ),
+                ]),
               );
             });
       },

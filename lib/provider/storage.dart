@@ -3,7 +3,7 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:what_to_do/model/todo.dart';
 
-class DataStore extends ChangeNotifier {
+class DataStoreProvider extends ChangeNotifier {
   static Future<Database> openDb() async {
     final database = await openDatabase(
       join(
@@ -12,7 +12,7 @@ class DataStore extends ChangeNotifier {
       ),
       onCreate: (db, version) async {
         return await db.execute(
-            "CREATE TABLE IF NOT EXISTS todo(id TEXT, todoTitle TEXT, todoDesc TEXT, date TEXT, category TEXT, categoryColor TEXT)");
+            "CREATE TABLE IF NOT EXISTS todo(id TEXT, todoTitle TEXT, todoDesc TEXT, date TEXT, category TEXT, categoryColor TEXT, priorityLevel TEXT)");
       },
       version: 1,
     );
@@ -23,9 +23,7 @@ class DataStore extends ChangeNotifier {
     final db = await openDb();
     await db.insert(
       "todo",
-      {
-        //Todo
-      },
+      todo.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     notifyListeners();
@@ -35,9 +33,7 @@ class DataStore extends ChangeNotifier {
     final db = await openDb();
     return await db.update(
       "todo",
-      {
-        //Todo
-      },
+      todo.toMap(),
       where: "id = ?",
       whereArgs: [
         //Todo
@@ -59,16 +55,17 @@ class DataStore extends ChangeNotifier {
   Future<List<Todo>> todoList() async {
     final db = await openDb();
 
-    final List<Map<String, dynamic>> transactions =
+    final List<Map<String, dynamic>> todos =
         await db.query("todo", orderBy: "date DESC");
-    return List.generate(transactions.length, (index) {
+    return List.generate(todos.length, (index) {
       return Todo(
-          id: "",
-          todoTitle: "todoTitle",
-          todoDesc: "todoDesc",
-          time: "time",
-          category: "category",
-          categoryColor: "categoryColor");
+          id: todos[index]["id"],
+          todoTitle: todos[index]["todoTitle"],
+          todoDesc: todos[index]["todoDesc"],
+          time: todos[index]["date"],
+          category: todos[index]["category"],
+          categoryColor: todos[index]["categoryColor"],
+          priorityLevel: todos[index]["priorityLevel"]);
     });
   }
 }
