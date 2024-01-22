@@ -68,6 +68,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       category: data[index].category,
                                       todoPriority: data[index].priorityLevel,
                                       time: data[index].time,
+                                      id: data[index].id,
                                     ),
                                   ),
                                 );

@@ -29,7 +29,7 @@ class DataStoreProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  static Future<int> editTodo(Todo todo) async {
+  Future<int> editTodo(Todo todo) async {
     final db = await openDb();
     return await db.update(
       "todo",

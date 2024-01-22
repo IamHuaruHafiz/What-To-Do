@@ -24,8 +24,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
           FloatingActionButtonLocation.miniCenterDocked,
       bottomNavigationBar: BottomNavigationBar(
           unselectedItemColor: Colors.black,
-          selectedItemColor: Colors.white,
-          backgroundColor: Colors.black38,
+          backgroundColor: Theme.of(context).colorScheme.background,
           onTap: (val) {
             setState(() {
               currentIndex = val;

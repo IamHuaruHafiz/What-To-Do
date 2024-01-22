@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:what_to_do/model/todo.dart';
 import 'package:what_to_do/provider/storage.dart';
+import 'package:what_to_do/widgets/alert_dialog_action_buttons.dart';
 import 'package:what_to_do/widgets/priority_item.dart';
+import 'package:what_to_do/widgets/set_alertdialog_title.dart';
+import 'package:what_to_do/widgets/text_form_field.dart';
 
 class TaskForm extends StatefulWidget {
   const TaskForm({
@@ -14,12 +17,15 @@ class TaskForm extends StatefulWidget {
 }
 
 class _TaskFormState extends State<TaskForm> {
+  GlobalKey<FormState> formKey = GlobalKey();
   late TextEditingController todoTileController;
   late TextEditingController todoDescriptionController;
-  var timeDateStamp = "";
+  late String timeDateStamp;
   var category = "";
-  var priority = "";
-
+  var priorityLevel = "1";
+  bool timerIncomplete = false;
+  bool categoryIncomplete = false;
+  bool priorityIncomplete = false;
   @override
   void initState() {
     todoTileController = TextEditingController();
@@ -41,13 +47,17 @@ class _TaskFormState extends State<TaskForm> {
     String categoryColor,
     String priorityLevel,
   ) {
-    if (todoTile.isEmpty &&
-        todoDesc.isEmpty &&
-        category.isEmpty &&
-        categoryColor.isEmpty &&
-        priorityLevel.isEmpty &&
-        priority.isEmpty) {
-      return;
+    if (!formKey.currentState!.validate()) {
+      if (category.isEmpty ||
+          categoryColor.isEmpty ||
+          priorityLevel.isEmpty ||
+          priorityLevel.isEmpty) {
+        setState(() {
+          timerIncomplete = true;
+          priorityIncomplete = true;
+        });
+        return;
+      }
     } else {
       var todo = Todo(
         id: DateTime.now().toIso8601String(),
@@ -59,6 +69,7 @@ class _TaskFormState extends State<TaskForm> {
         priorityLevel: priorityLevel,
       );
       Provider.of<DataStoreProvider>(context, listen: false).addTodo(todo);
+      Navigator.of(context).pop();
       debugPrint("success");
     }
   }
@@ -73,52 +84,25 @@ class _TaskFormState extends State<TaskForm> {
           style: Theme.of(context).textTheme.titleLarge,
         ),
         Form(
+          key: formKey,
           child: Column(
             children: [
-              TextFormField(
-                controller: todoTileController,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  hintText: "Title",
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(12),
-                    ),
-                    borderSide: BorderSide(
-                      color: Colors.grey,
-                    ),
-                  ),
-                  errorBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red.shade500),
-                  ),
-                ),
+              TextFormFieldWidget(
+                controllerName: todoTileController,
+                hintText: "Title",
               ),
-              TextFormField(
-                controller: todoDescriptionController,
+              TextFormFieldWidget(
+                controllerName: todoDescriptionController,
+                hintText: "Description",
                 maxLines: 4,
-                decoration: InputDecoration(
-                  hintText: "Description",
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: const OutlineInputBorder(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(12),
-                    ),
-                    borderSide: BorderSide(
-                      color: Colors.grey,
-                    ),
-                  ),
-                  errorBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(color: Colors.red.shade500),
-                  ),
-                ),
-              ),
+              )
             ],
           ),
         ),
         Row(
           children: [
             IconButton(
+              color: timerIncomplete ? Colors.red : null,
               onPressed: () async {
                 await showDatePicker(
                   context: context,
@@ -137,11 +121,14 @@ class _TaskFormState extends State<TaskForm> {
                             selectedDate.day,
                             selectedTime.hour,
                             selectedTime.minute);
-                        debugPrint(dateTimeSelected.toString());
+
                         setState(() {
                           timeDateStamp = dateTimeSelected.toString();
                         });
                         debugPrint(timeDateStamp);
+                        setState(() {
+                          timerIncomplete = false;
+                        });
                       }
                     });
                   }
@@ -150,17 +137,14 @@ class _TaskFormState extends State<TaskForm> {
               icon: const Icon(Icons.timer_outlined),
             ),
             IconButton(
+              color: categoryIncomplete ? Colors.red : null,
               onPressed: () {
                 showDialog(
                     context: context,
                     builder: (context) {
                       return AlertDialog.adaptive(
-                        title: const Column(
-                          children: [
-                            Text("Choose Category"),
-                            Divider(),
-                          ],
-                        ),
+                        title:
+                            const SetAlertDialogTitle(title: "Choose Category"),
                         content: GridView.count(
                           crossAxisSpacing: 6,
                           mainAxisSpacing: 6,
@@ -187,6 +171,7 @@ class _TaskFormState extends State<TaskForm> {
               icon: const Icon(Icons.sell_outlined),
             ),
             IconButton(
+              color: priorityIncomplete ? Colors.red : null,
               onPressed: () {
                 showDialog(
                     context: context,
@@ -194,43 +179,29 @@ class _TaskFormState extends State<TaskForm> {
                       return AlertDialog(
                         elevation: 0,
                         backgroundColor: Theme.of(context).cardColor,
-                        title: const Column(
-                          children: [
-                            Text("Task Priority"),
-                            Divider(),
-                          ],
+                        title: const SetAlertDialogTitle(
+                          title: "Edit Task Priority",
                         ),
-                        content: const Row(
-                          children: [
-                            PriorityItem(
-                              number: 1,
-                            ),
-                            PriorityItem(
-                              number: 2,
-                            ),
-                            PriorityItem(
-                              number: 3,
-                            ),
-                          ],
+                        content: Row(
+                          children: List.generate(
+                            3,
+                            (index) => InkWell(
+                                onTap: () {
+                                  print("hello");
+                                },
+                                child: PriorityItem(number: index + 1)),
+                          ),
                         ),
                         actions: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text("Cancel"),
-                              ),
-                              ElevatedButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: const Text("Save"),
-                              ),
-                            ],
-                          )
+                          AlertDialogActionButtons(
+                              button1CallBack: () {
+                                Navigator.of(context).pop();
+                              },
+                              button2CallBack: () {
+                                Navigator.of(context).pop();
+                              },
+                              button1Text: "Cancel",
+                              button2Text: "Save")
                         ],
                       );
                     });
@@ -245,7 +216,7 @@ class _TaskFormState extends State<TaskForm> {
                       todoDescriptionController.text,
                       category,
                       "categoryColor",
-                      "priorityLevel");
+                      priorityLevel);
                 },
                 icon: const Icon(
                   Icons.send_outlined,
